@@ -216,7 +216,9 @@ func (d *Context) child() (err error) {
 
 	decoder := json.NewDecoder(os.Stdin)
 	if err = decoder.Decode(d); err != nil {
-		d.pidFile.Remove()
+		if d.pidFile != nil {
+			d.pidFile.Remove()
+		}
 		return
 	}
 
@@ -229,11 +231,15 @@ func (d *Context) child() (err error) {
 	}
 
 	if err = syscall.Close(0); err != nil {
-		d.pidFile.Remove()
+		if d.pidFile != nil {
+			d.pidFile.Remove()
+		}
 		return
 	}
 	if err = syscallDup(3, 0); err != nil {
-		d.pidFile.Remove()
+		if d.pidFile != nil {
+			d.pidFile.Remove()
+		}
 		return
 	}
 
@@ -243,7 +249,9 @@ func (d *Context) child() (err error) {
 	if len(d.Chroot) > 0 {
 		err = syscall.Chroot(d.Chroot)
 		if err != nil {
-			d.pidFile.Remove()
+			if d.pidFile != nil {
+				d.pidFile.Remove()
+			}
 			return
 		}
 	}
@@ -256,7 +264,9 @@ func (d *Context) release() (err error) {
 		return
 	}
 	if d.pidFile != nil {
-		err = d.pidFile.Remove()
+		if d.pidFile != nil {
+			err = d.pidFile.Remove()
+		}
 	}
 	return
 }
